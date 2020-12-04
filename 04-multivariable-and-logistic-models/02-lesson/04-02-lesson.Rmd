@@ -27,6 +27,14 @@ knitr::opts_chunk$set(fig.align = "center",
                       message = FALSE, 
                       warning = FALSE)
 
+# set options for exercises and checking -----------------------------------------------------------------
+
+tutorial_options(
+  exercise.timelimit = 60, 
+  exercise.checker = gradethis::grade_learnr
+  )
+
+
 # data prep --------------------------------------------------------------------
 
 SAT <- mosaicData::SAT %>%
