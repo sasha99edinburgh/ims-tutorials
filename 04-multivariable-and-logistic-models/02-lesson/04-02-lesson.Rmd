@@ -16,6 +16,7 @@ library(tidyverse)
 library(broom)
 library(emo)
 library(mosaicData)
+library(gradethis)
 
 # knitr options ----------------------------------------------------------------
 
