@@ -15,6 +15,7 @@ library(openintro)
 library(tidyverse)
 library(broom)
 library(emo)
+library(gradethis)
 
 # knitr options ----------------------------------------------------------------
 
@@ -24,6 +25,13 @@ knitr::opts_chunk$set(fig.align = "center",
                       echo = FALSE, 
                       message = FALSE, 
                       warning = FALSE)
+
+# set options for exercises and checking -----------------------------------------------------------------
+
+tutorial_options(
+  exercise.timelimit = 60, 
+  exercise.checker = gradethis::grade_learnr
+  )
 
 # data prep --------------------------------------------------------------------
 
@@ -133,6 +141,17 @@ glimpse(mariokart)
 lm(total_pr ~ wheels + cond, data = mariokart)
 ```
 
+```{r ex1-check}
+grade_result(
+  pass_if(~identical(floor(.result$Coefficients[1]), 37), "You have fitted the model correctly!"),
+  fail_if(~identical(round(.result$Coefficients[1], 1), 38.4), "Did you forget to include the `cond` variable in your model?"),
+   fail_if(~identical(floor(.result$Coefficients[1]), 53), "Did you forget to include the `wheels` variable in your model?"),
+  fail_if(~TRUE, "Not quite. Look at the hints for help!")
+  
+)
+
+```
+
 ### Reasoning about two intercepts
 
 The `mariokart` data contains several other variables. The `total_pr`, `start_pr`, and `ship_pr` variables are numeric, while the `cond` and `stock_photo` variables are categorical. 
@@ -146,7 +165,7 @@ question("Which `formula` will result in a parallel slopes model?",
   answer("`cond ~ start_pr + stock_photo`", message = "Is the response numeric?"),
   answer("`total_pr ~ ship_pr + stock_photo`", correct = TRUE),
   answer("`total_pr ~ cond`", message = "How many explanatory variables?"), 
-  allow_retry = TRUE
+  allow_retry = TRUE,
 )
 ```
 
@@ -287,7 +306,7 @@ The parallel slopes model `mod` relating total price to the number of wheels and
 - Use `geom_line()` *once* to add two parallel lines corresponding to our model.
 
 
-- Call the `augment()` function on the model object `mod`, the use `glimpse(augmented_mod)` to explore the resulting data frame.
+- Call the `augment()` function on the model object `mod`, then use `glimpse(augmented_mod)` to explore the resulting data frame.
 - To create `data_space` first map each of the three variables to an aesthetic in your `ggplot()`, then use the `geom_point()` function.
 - To plot the fitted values as a line, your `geom_line()` call will need to specify a new `y` aesthetic to plot the `.fitted` values.
 
@@ -295,11 +314,18 @@ The parallel slopes model `mod` relating total price to the number of wheels and
 mod <- lm(total_pr ~ wheels + cond, data = mariokart)
 ```
 
-```{r ex2, exercise=TRUE}
+```{r ex2, exercise = TRUE}
 # Augment the model
 augmented_mod <-___
 glimpse(___)
+```
 
+```{r ex2-solution}
+augmented_mod <- augment(mod)
+glimpse(augmented_mod)
+```
+
+```{r ex2-plot, exercise = TRUE, exercise.setup = "ex2-setup"}
 # scatterplot, with color
 data_space <- ggplot(___, aes(x = ___, y = ___, color = ___)) + 
   geom_point()
@@ -309,21 +335,12 @@ data_space +
   geom_line(aes(y = ___))
 ```
 
-```{r ex2-hint-1}
-augmented_mod <- augment(mod)
-glimpse(augmented_mod)
-```
-
-```{r ex2-hint-2}
+```{r ex2-plot-hint-1}
 data_space <- ggplot(augmented_mod, aes(x = wheels, y = total_pr, color = cond)) + 
   geom_point()
 ```
 
-```{r ex2-solution}
-# Augment the model
-augmented_mod <- augment(mod)
-glimpse(augmented_mod)
-
+```{r ex2-plot-solution}
 # scatterplot, with color
 data_space <- ggplot(augmented_mod, aes(x = wheels, y = total_pr, color = cond)) + 
   geom_point()
@@ -331,6 +348,10 @@ data_space <- ggplot(augmented_mod, aes(x = wheels, y = total_pr, color = cond))
 # single call to geom_line()
 data_space + 
   geom_line(aes(y = .fitted))
+```
+
+```{r ex2-plot-check}
+grade_code("Your solution is correct!")
 ```
 
 ## Interpreting parallel slopes coefficients
@@ -507,13 +528,27 @@ $y = \beta_0 + \beta_1 \cdot x + \beta_2 \cdot z$, the corresponding formula is 
 
 ```
 
-```{r ex3-hint}
+```{r ex3-hint-1}
 lm(bwt ~ ___ + ___, data = ___)
+```
+
+```{r ex3-hint-2}
+lm(bwt ~ age + ___, data = ___)
 ```
 
 ```{r ex3-solution}
 # build model
 lm(bwt ~ age + parity, data = babies)
+```
+
+```{r ex3-check}
+grade_result(
+  pass_if(~identical(floor(.result$Coefficients[1])), 118, "You have fitted the model correctly!"),
+  fail_if(~identical(floor(.result$Coefficients$[1]), 116), "Did you forget to include the variable `parity`?"),
+  fail_if(~identical(floor(.result$Coefficients$[1]), 120), "Did you forget to include the variable `age`?"),
+  fail_if(~TRUE, "Look at the hints for help.")
+)
+
 ```
 
 ### Syntax from plot
@@ -533,13 +568,27 @@ Use `lm()` to build a parallel slopes model implied by the plot. It's not necess
 
 ```
 
-```{r ex4-hint}
-lm(___ ~ ___ + ___, data = babies)
+```{r ex4-hint-1}
+lm(___ ~ ___ + ___, data = ___)
+```
+
+```{r ex4-hint-2}
+lm(bwt ~ ___ + ___, data = ___)
 ```
 
 ```{r ex4-solution}
 # build model
 lm(bwt ~ gestation + smoke, data = babies)
+```
+
+```{r ex4-check}
+grade_result(
+  pass_if(~identical(round(.result$Coefficients[1], 2), -0.93), "You have fitted the model correctly!"),
+  fail_if(~identical(floor(.result$Coefficients$[1]), -11), "Did you forget to include the variable `smoke`?"),
+  fail_if(~identical(floor(.result$Coefficients$[1]), 123), "Did you forget to include the variable `age`?"),
+  fail_if(~TRUE, "Look at the hints for help.")
+)
+
 ```
 
 ## Congratulations!
