@@ -16,6 +16,7 @@ library(tidyverse)
 library(broom)
 library(modelr)
 library(emo)
+library(gradethis)
 
 # knitr options ----------------------------------------------------------------
 
@@ -25,6 +26,14 @@ knitr::opts_chunk$set(fig.align = "center",
                       echo = FALSE, 
                       message = FALSE, 
                       warning = FALSE)
+
+# set options for exercises and checking -----------------------------------------------------------------
+
+tutorial_options(
+  exercise.timelimit = 60, 
+  exercise.checker = gradethis::grade_learnr
+  )
+
 
 # data prep --------------------------------------------------------------------
 
@@ -194,6 +203,13 @@ lm(total_pr ~ ___ + ___, data = mariokart)
 lm(total_pr ~ duration + start_pr, data = mariokart)
 ```
 
+```{r ex1-check}
+grade_result(
+  pass_if(~identical(floor(.result$coefficients[[1]]),51), "You have written the model correctly!"),
+  fail_if(~TRUE, "Make sure you are using the correct variable names. Use '?mariokart' to identify the variable names.")
+)
+```
+
 ### Tiling the plane
 
 
@@ -205,7 +221,7 @@ This is a multistep process:
 - Use `augment()` with the `newdata` argument to find the $\hat{y}$'s corresponding to the values in `grid`.
 - Add these to the `data_space` plot by using the `fill` aesthetic and `geom_tile()`.
 
-```{r ex2-setup}
+```{r ex2-1-setup}
 mariokart <- filter(mariokart, total_pr < 100)
 mod <- lm(total_pr ~ duration + start_pr, data = mariokart)
 
@@ -224,31 +240,58 @@ The model object `mod` is already in your workspace.
 - Use `augment()` to create a `data.frame` that contains the values the model outputs for each row of `grid`.
 - Use `geom_tile` to illustrate these predicted values over the `data_space` plot. Use the `fill` aesthetic and set `alpha = 0.5`.
 
-```{r ex2, exercise=TRUE}
+```{r ex2-1, exercise=TRUE}
 # add predictions to grid
 price_hats <- _____
+```
 
+```{r ex2-1-hint}
+price_hats <- augment(___, newdata = ___)
+```
+
+```{r ex2-1-solution}
+price_hats <- augment(mod, newdata = grid)
+```
+
+```{r ex2-1-check}
+grade_code("Your solution is correct!")
+```
+
+```{r ex2-2-setup}
+mariokart <- filter(mariokart, total_pr < 100)
+mod <- lm(total_pr ~ duration + start_pr, data = mariokart)
+
+data_space <- ggplot(mariokart, aes(x = duration, y = start_pr)) + 
+  geom_point(aes(color = total_pr))
+  
+grid <- mariokart %>%
+  data_grid(
+    duration = seq_range(duration, by = 1), 
+    start_pr = seq_range(start_pr, by = 0.01)
+  )
+
+price_hats <- augment(mod, newdata = grid)
+```
+
+```{r ex2-2, exercise=TRUE}
 # tile the plane
 data_space + 
   geom_tile(data = ____, aes(___),____)
 ```
 
-```{r ex2-hint-1}
-price_hats <- augment(mod, newdata = grid)
-```
-
-```{r ex2-hint-2}
+```{r ex2-2-hint}
 data_space + 
   geom_tile(data = price_hats, aes(___), alpha = ___)
 ```
 
-```{r ex2-solution}
-# add predictions to grid
-price_hats <- augment(mod, newdata = grid)
-
+```{r ex2-2-solution}
 # tile the plane
 data_space + 
   geom_tile(data = price_hats, aes(fill = .fitted), alpha = 0.5)
+```
+
+```{r ex2-2-check}
+grade_code("You have produced the correct plot!")
 ```
 
 ### Models in 3D
@@ -290,6 +333,8 @@ plane <- tidy_planes %>%
 - Run the `plot_ly` command to draw 3D scatterplot for `total_pr` as a function of `duration` and `start_pr` by mapping the `z` variable to the response and the `x` and `y` variables to the explanatory variables. Duration should be on the x-axis and starting price should be on the y-axis.
 - Use `add_surface()` to draw a plane through the cloud of points by setting `z = ~plane`.
 
+*Hint:* Use `add_surface()` to draw the plane.
+
 ```{r ex3, exercise=TRUE}
 # draw the 3D scatterplot
 p <- plot_ly(data = mariokart, z = ~ ____,x = ~____, y = ~____, opacity = 0.6) %>%
@@ -300,9 +345,6 @@ p %>%
   add_surface(x = ~x, y = ~y, z = ~_____, showscale = FALSE)
 ```
 
-<div id="ex3-hint">
-**Hint:** Use `add_surface()` to draw the plane.
-</div>
 
 ```{r ex3-solution, eval=FALSE}
 # draw the 3D scatterplot
@@ -410,6 +452,20 @@ Fit a multiple regression model for the total auction price of an item in the `m
 *Hint:* Remember, the inclusion of another variable in your model is sometimes referred to as "controlling for" that variable.
 
 ```{r ex4, exercise=TRUE}
+# Fit the model using start_pr and duration
+
+```
+
+```{r ex4-hint}
+# Fit the model using start_pr duration
+lm(total_pr ~ start_pr + duration, data = mariokart)
+```
+
+```{r ex1-check}
+grade_result(
+  pass_if(~identical(floor(.result$coefficients[[1]]),51), "You have written the model correctly!"),
+  fail_if(~TRUE, "Make sure you are using the correct variable names. Use '?mariokart' to identify the variable names.")
+)
 
 ```
 
@@ -546,6 +602,8 @@ plane1 <- tidy_planes %>%
 - Use `plot_ly` to draw 3D scatterplot for `total_pr` as a function of `duration`, `start_pr`, and `cond` by mapping the `z` variable to the response and the `x` and `y` variables to the explanatory variables. Duration should be on the x-axis and starting price should be on the y-axis. Use color to represent `cond`.
 - Use `add_surface()` (twice) to draw two planes through the cloud of points, one for new MarioKarts and another for used ones. Use the objects `plane0` and `plane1`.
 
+*Hint:* In `add_surface()`, define `z = ~ plane0` and `z = ~ plane1`.
+
 ```{r ex5, exercise=TRUE}
 # draw the 3D scatterplot
 p <- plot_ly(data = mariokart, z = ~___, x = ~___, y = ~___, opacity = 0.6) %>%
@@ -556,10 +614,6 @@ p %>%
   add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE) %>%
   add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE)
 ```
-
-<div id="ex5-hint">
-**Hint:** In `add_surface()`, define `z = ~ plane0` and `z = ~ plane1`.
-</div>
 
 ```{r ex5-solution}
 # draw the 3D scatterplot
