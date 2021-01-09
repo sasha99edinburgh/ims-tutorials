@@ -443,16 +443,14 @@ The dataset `mariokart` is already loaded in your workspace.
 
 - Use the `color` aesthetic and the `geom_smooth()` function to plot the interaction model between duration and condition in the data space. Make sure you set the `method` and `se` arguments of `geom_smooth()`.
 
+*Hint:* Define groups using the color `aes`thetic in the ggplot call.
+
 ```{r ex4, exercise=TRUE}
 # interaction plot
 ggplot(___, aes(___)) + 
   geom_point() + 
   geom_smooth(___)
 ```
-
-<div id="ex4-hint">
-**Hint:** Define groups using the color `aes`thetic in the ggplot call.
-</div>
 
 ```{r ex4-solution}
 # interaction plot
