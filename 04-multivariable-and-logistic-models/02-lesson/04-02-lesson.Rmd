@@ -424,11 +424,13 @@ lm(total_pr ~ duration + cond + cond:duration, data = mariokart)
 
 ```{r ex3-check}
 grade_result(
-  pass_if(~identical(round(.result$coefficients[4],1),2.3), "You have fit the model correctly!"),
-  fail_if(~identical(round(.result$coefficients[4],2),0.36), "Did you forget to include the term `duration` in your model?"),
-  fail_if(~identical(floor(.result$coefficients[1]),51), "Did you forget to include the term `cond` in your model?"),
+  pass_if(~identical(round(.result$coefficients[[4]],1),2.3), "You have fit the model correctly!"),
+  fail_if(~identical(round(.result$coefficients[[4]],2),0.36), "Did you forget to include the term `duration` in your model?"),
+  fail_if(~identical(floor(.result$coefficients[[1]]),51), "Did you forget to include the term `cond` in your model?"),
   fail_if(~TRUE, "Look at the hint for help.")
 )
+
+
 ```
 
 ### Visualizing interaction models
@@ -561,17 +563,16 @@ slr <- ggplot(mariokart, aes(y = total_pr, x = duration)) +
 slr + aes(___)
 ```
 
-
-<div id="ex5-hint">
-**Hint:** You can add layers to an existing plot with `+`.
-</div>
-
 ```{r ex5-hint-1}
+You can add layers to an existing plot with `+`.
+```
+
+```{r ex5-hint-2}
 # model with one slope
 lm(total_pr ~ duration, data = mariokart)
 ```
 
-```{r ex5-hint-2}
+```{r ex5-hint-3}
 # plot with two slopes
 slr + aes(color = cond)
 ```
