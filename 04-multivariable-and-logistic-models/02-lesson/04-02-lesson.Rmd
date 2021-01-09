@@ -173,53 +173,83 @@ We can see both measures in the output of the `summary()` function on our model 
 - The first argument of `lm()` is a formula involving the variables `total_pr`, `wheels`, `cond`, and `noise`.
 - Call the function `summary()` with the argument `mod2`.
 
-```{r ex1-setup}
+```{r ex1-mod-setup}
 mod <- lm(total_pr ~ wheels + cond, data = mariokart)
-set.seed(1)
 ```
 
-```{r ex1, exercise=TRUE}
+```{r ex1-1, exercise=TRUE, exercise.setup="ex1-mod-setup"}
 # R^2 and adjusted R^2
+```
 
-# add random noise
+
+```{r ex1-1-hint}
+# R^2 and adjusted R^2
+summary(mod)
+```
+
+```{r ex1-2, exercise=TRUE}
+# set the seed to 1 then add random noise
+set.seed(___)
 mariokart_noisy <- ____
-  
+```
+
+```{r ex1-2-hint-1}
+# set the seed to 1 then add random noise
+set.seed(1)
+mariokart_noisy <- mariokart %>%
+  mutate(___)
+```
+
+```{r ex1-2-hint-2}
+# set the seed to 1 then add random noise
+set.seed(1)
+mariokart_noisy <- mariokart %>%
+  mutate(noise = rnorm(___))
+```
+
+```{r ex1-2-solution}
+# set the seed to 1 then add random noise
+set.seed(1)
+mariokart_noisy <- mariokart %>%
+  mutate(noise = rnorm(nrow(mariokart)))
+```
+
+```{r ex1-2-check}
+grade_code("Your solution is correct!")
+```
+
+```{r ex1-mod2-setup}
+set.seed(1)
+mariokart_noisy <- mariokart %>%
+  mutate(noise = rnorm(nrow(mariokart)))
+
+mod2 <- lm(total_pr ~ wheels + cond + noise, data = mariokart_noisy)
+```
+
+```{r ex1-3, exercise=TRUE, exercise.setup = "ex1-mod2-setup"}
 # compute new model
 mod2 <- ____
+```
 
+```{r ex1-3-solution}
+# compute new model
+mod2 <- lm(total_pr ~ wheels + cond + noise, data = mariokart_noisy)
+```
+
+```{r ex1-4,exercise=TRUE, exercise.setup="ex1-mod2-setup"}
 # new R^2 and adjusted R^2
 _____(____)
 ```
 
-```{r ex1-hint-1}
-# R^2 and adjusted R^2
-summary(mod)
-```
-
-```{r ex1-hint-2}
-# add random noise
-mariokart_noisy <- mariokart %>%
-  mutate(noise = rnorm(nrow(mariokart)))
-```
-
-```{r ex1-hint-3}
-# compute new model
-mod2 <- lm(total_pr ~ wheels + cond + noise, data = mariokart_noisy)
-```
-
-```{r ex1-solution}
-# R^2 and adjusted R^2
-summary(mod)
-
-# add random noise
-mariokart_noisy <- mariokart %>%
-  mutate(noise = rnorm(nrow(mariokart)))
-  
-# compute new model
-mod2 <- lm(total_pr ~ wheels + cond + noise, data = mariokart_noisy)
-
+```{r ex1-4-solution}
 # new R^2 and adjusted R^2
 summary(mod2)
+```
+
+```{r ex1-4-check}
+grade_result(
+  pass_if(~identical(round(.result$r.squared,3),0.727), "Your new R^2 and adjusted R^2 are correct!"),
+  fail_if(~TRUE,"Not quite. Look at the hints for help!"))
 ```
 
 ### Prediction
@@ -246,6 +276,7 @@ mod <- lm(total_pr ~ wheels + cond, data = mariokart)
 
 
 # return a data frame
+
 
 ```
 
@@ -391,6 +422,15 @@ Include the term `cond:duration` in your formula to model the interaction of con
 lm(total_pr ~ duration + cond + cond:duration, data = mariokart)
 ```
 
+```{r ex3-check}
+grade_result(
+  pass_if(~identical(round(.result$coefficients[4],1),2.3), "You have fit the model correctly!"),
+  fail_if(~identical(round(.result$coefficients[4],2),0.36), "Did you forget to include the term `duration` in your model?"),
+  fail_if(~identical(floor(.result$coefficients[1]),51), "Did you forget to include the term `cond` in your model?"),
+  fail_if(~TRUE, "Look at the hint for help.")
+)
+```
+
 ### Visualizing interaction models
 
 Interaction allows the slope of the regression line in each group to vary. In this case, this means that the relationship between the final price and the length of the auction is moderated by the condition of each item. 
@@ -417,6 +457,10 @@ ggplot(___, aes(___)) +
 ggplot(mariokart, aes(y = total_pr, x = duration, color = cond)) + 
   geom_point() + 
   geom_smooth(method = "lm", se = FALSE)
+```
+
+```{r ex4-check}
+grade_code("You have produced the correct plot!")
 ```
 
 ## Simpson's Paradox
@@ -522,12 +566,30 @@ slr + aes(___)
 **Hint:** You can add layers to an existing plot with `+`.
 </div>
 
+```{r ex5-hint-1}
+# model with one slope
+lm(total_pr ~ duration, data = mariokart)
+```
+
+```{r ex5-hint-2}
+# plot with two slopes
+slr + aes(color = cond)
+```
+
 ```{r ex5-solution}
+slr <- ggplot(mariokart, aes(y = total_pr, x = duration)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", se = FALSE)
+
 # model with one slope
 lm(total_pr ~ duration, data = mariokart)
 
 # plot with two slopes
 slr + aes(color = cond)
+```
+
+```{r ex5-check}
+grade_code("Your solution is correct!")
 ```
 
 ## Congratulations!
