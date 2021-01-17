@@ -15,6 +15,7 @@ library(openintro)
 library(Stat2Data)
 library(tidyverse)
 library(emo)
+library(gradethis)
 
 # knitr options ----------------------------------------------------------------
 
@@ -24,6 +25,12 @@ knitr::opts_chunk$set(fig.align = "center",
                       echo = FALSE, 
                       message = FALSE, 
                       warning = FALSE)
+# set options for exercises and checking -----------------------------------------------------------------
+
+tutorial_options(
+  exercise.timelimit = 60, 
+  exercise.checker = gradethis::grade_learnr
+  )
 
 # data prep --------------------------------------------------------------------
 
@@ -92,14 +99,11 @@ Multiple regression can be an effective technique for understanding how a respon
 
 One quick technique for jump-starting EDA is to examine all of the pairwise scatterplots in your data. This can be achieved using the `pairs()` function. Look for variables in the `nyc` data set that are strongly correlated, as those relationships will help us check for **multicollinearity** later on.  
 
+*Hint:* The `pairs()` function is helpful for looking for pairs of variables that have high correlation.
 
 ```{r ex1, exercise=TRUE}
 
 ```
-
-<div id="ex1-hint">
-**Hint:** The `paris()` function is helpful for looking for pairs of variables that have high correlation.
-</div>
 
 ```{r ex1-solution}
 pairs(nyc)
@@ -127,32 +131,53 @@ On your own, interpret these coefficients and examine the fit of the model. What
 - Use `ggplot` to make a scatter plot for `Price` as a function of `Food`. 
 - Use `lm()` to fit a simple linear regression model for `Price` as a function of `Food`.
 
-
-
-```{r ex2, exercise=TRUE}
+```{r ex2-1, exercise = TRUE}
 # Price by Food plot
 
+```
 
+```{r ex2-1-hint-1}
+#Price by Food plot
+ggplot(data = ___, aes(x = ___, y = ___)) +
+  ____
+```
+
+```{r ex2-1-hint-2}
+#Price by Food plot
+ggplot(data = nyc, aes(x = ____, y = ____)) +
+  geom_point()
+```
+
+```{r ex2-1-solution}
+# Price by Food plot
+ggplot(data = nyc, aes(x = Food, y = Price)) +
+  geom_point()
+```
+
+```{r ex2-1-check}
+grade_code("Your solution is correct!")
+```
+
+```{r ex2-2, exercise = TRUE}
 # Price by Food model
 
 ```
 
-```{r ex2-hint-1}
-ggplot(data = nyc, aes(x = Food, y = Price)) +
-  geom_point()
+```{r ex2-2-hint}
+lm(___, data = nyc)
 ```
 
-```{r ex2-hint-2}
-lm(Price ~ Food, data = nyc)
-```
-
-```{r ex2-solution}
-# Price by Food plot
-ggplot(data = nyc, aes(x = Food, y = Price)) +
-  geom_point()
-
+```{r ex2-2-solution}
 # Price by Food model
-lm(Price ~ Food, data = nyc)
+lm(Food~Price, data = nyc)
+```
+
+```{r ex2-2-check}
+grade_result(
+  pass_if(~identical(floor(.result$coefficients[[1]]), -18), "You have fit the model correctly!"),
+  fail_if(~identical(floor(.result$coefficients[[1]]),14), "Did you perhaps use `Food ~ Price`? Remember, it's y ~ x, not x ~ y"),
+  fail_if(~TRUE, "Look at the hint for help.")
+)
 ```
 
 ## Incorporating another variable
@@ -228,20 +253,16 @@ Let's expand our model into a parallel slopes model by including the `East` vari
 * Interpret the coefficients and the fit of the model. 
 * Can you explain the meaning of the coefficient on `East` in simple terms? Did the coefficient on `Food` change from the previous model? If so, why? Did it change by a lot or just a little? 
 
+*Hint:* What is the difference between the coefficients that are in both models?
 
 ```{r ex3, exercise=TRUE}
 
 ```
 
-<div id="ex3-hint">
-*Hint:* What is the difference between the coefficients that are in both models?
-</div>
-
 ```{r ex3-solution}
 lm(Price ~ Food + East, data = nyc)
 ```
 
-### 
 
 ```{r mc2}
 question("Identify the statement that is *FALSE*:",
@@ -294,34 +315,62 @@ plane <- tidy_planes %>%
   matrix(nrow = length(x), byrow = TRUE)
 ```
 
-```{r ex4, exercise=TRUE}
+```{r ex4-1, exercise=TRUE}
 # fit model
 
+```
 
+```{r ex4-1-hint}
+# fit model
+lm(Price ~ ____, data = ___)
+```
+
+```{r ex4-1-solution}
+# fit model
+lm(Price ~ Food + Service, data = nyc)
+```
+
+```{r ex4-1-check}
+grade_result(
+  pass_if(~identical(floor(.result$coefficients[[1]]), -22), "You have written the model correctly!"),
+  fail_if(~TRUE, "Make sure you write the model using the correct variable names.")
+)
+```
+
+```{r ex4-2, exercise = TRUE, exercise.setyp = "ex4-setup"}
 # draw 3D scatterplot
-p <- plot_ly(data = nyc, z = ~___, x = ~___, y = ~___, opacity = 0.6) %>%
+p <- plot_ly(data = ___, z = ~___, x = ~___, y = ~___, opacity = 0.6) %>%
   add_markers() 
 
 # draw a plane
 p %>%
-  add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE) 
+  _____(x = ~x, y = ~y, z = ~___, showscale = FALSE)
 ```
 
-<div id="ex4-hint">
-**Hint:** Remember `add_surface()`?
-</div>
+```{r ex4-2-hint-1}
+# draw 3D scatterplot
+p <- plot_ly(data = nyc, z = ~___, x = ~Food, y = ~___, opacity = 0.6) %>%
+  add_markers() 
 
-```{r ex4-solution}
-# fit model
-lm(Price ~ Food + Service, data = nyc)
+# draw a plane
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE)
 
+```
+
+```{r ex4-2-solution}
 # draw 3D scatterplot
 p <- plot_ly(data = nyc, z = ~Price, x = ~Food, y = ~Service, opacity = 0.6) %>%
   add_markers() 
 
 # draw a plane
 p %>%
-  add_surface(x = ~x, y = ~y, z = ~plane, showscale = FALSE) 
+  add_surface(x = ~x, y = ~y, z = ~plane, showscale = FALSE)
+
+```
+
+```{r ex4-2-check}
+grade_code()
 ```
 
 
@@ -492,7 +541,7 @@ col3 <- colorRamp(c("orange"))
 ```{r ex6, exercise=TRUE}
 # draw 3D scatterplot
 p <- plot_ly(data = nyc, z = ~___, x = ~___, y = ~___, opacity = 0.6) %>%
-  add_markers(color = ~factor(East)) 
+  add_markers(color = ~factor(___)) 
 
 # draw two planes
 p %>%
@@ -500,9 +549,20 @@ p %>%
   add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE)
 ```
 
-<div id="ex6-hint">
-**Hint:** In `add_surface()` `z` should be `~plane0` in one layer and `~plane1` in the other.
-</div>
+```{r ex6-hint-1}
+In `add_surface()` `z` should be `~plane0` in one layer and `~plane1` in the other.
+```
+
+```{r ex6-hint-2}
+# draw 3D scatterplot
+p <- plot_ly(data = nyc, z = ~___, x = ~___, y = ~___, opacity = 0.6) %>%
+  add_markers(color = ~factor(East)) 
+
+# draw two planes
+p %>%
+  add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE) %>%
+  add_surface(x = ~x, y = ~y, z = ~___, showscale = FALSE)
+```
 
 ```{r ex6-solution}
 # draw 3D scatterplot
@@ -513,6 +573,10 @@ p <- plot_ly(data = nyc, z = ~Price, x = ~Food, y = ~Service, opacity = 0.6) %>%
 p %>%
   add_surface(x = ~x, y = ~y, z = ~plane0, showscale = FALSE) %>%
   add_surface(x = ~x, y = ~y, z = ~plane1, showscale = FALSE)
+```
+
+```{r ex6-check}
+grade_code("Tour solution is correct!")
 ```
 
 ### Full model

@@ -16,6 +16,7 @@ library(Stat2Data)
 library(tidyverse)
 library(broom)
 library(emo)
+library(gradethis)
 
 # knitr options ----------------------------------------------------------------
 
@@ -25,6 +26,13 @@ knitr::opts_chunk$set(fig.align = "center",
                       echo = FALSE, 
                       message = FALSE, 
                       warning = FALSE)
+
+# set options for exercises and checking -----------------------------------------------------------------
+
+tutorial_options(
+  exercise.timelimit = 60, 
+  exercise.checker = gradethis::grade_learnr
+  )
 
 # data prep --------------------------------------------------------------------
 
@@ -136,6 +144,7 @@ The medical school acceptance data is loaded as `MedGPA`.
 - Create a scatterplot called `data_space` for `Acceptance` as a function of `GPA`. Use `geom_jitter()` to apply a small amount of jitter to the points in the $y$-direction by setting `width = 0` and `height = 0.05`.
 - Use `geom_smooth()` to add the simple linear regression line to `data_space`.
 
+*Hint:* In `geom_smooth()` define the `method` and `se` arguments for a straight line fit without the standard error band.
 
 ```{r ex1, exercise=TRUE}
 # scatterplot with jitter
@@ -146,10 +155,6 @@ data_space <- ggplot(___) +
 data_space + 
   ___
 ```
-
-<div id="ex1-hint">
-**Hint:** In `geom_smooth()` define the `method` and `se` arguments for a straight line fit without the standard error band.
-</div>
 
 ```{r ex1-solution}
 # scatterplot with jitter
@@ -174,10 +179,33 @@ Moreover, the alternative logistic regression model  -  which we will fit next  
 - Create a scatterplot called `data_space` for `Acceptance` as a function of `GPA` for only those observations. Use `geom_jitter()` to apply `0.05` jitter to the points in the $y$-direction and no jitter to the $x$ direction. 
 - Use `geom_smooth()` to add only the simple linear regression line to `data_space`.
 
-```{r ex2, exercise=TRUE}
+```{r ex2-1, exercise=TRUE}
 # filter
 MedGPA_middle <- ___
+```
 
+```{r ex2-1-hint}
+#filter
+MedGPA_middle <- MedGPA %>%
+  filter(GPA >= ___, GPA <= ___)
+```
+
+```{r ex2-1-solution}
+# filter
+MedGPA_middle <- MedGPA %>%
+  filter(GPA >= 3.375, GPA <= 3.770)
+```
+
+```{r ex2-1-check}
+grade_code("Your solution is correct!")
+```
+
+```{r ex2-2-setup}
+MedGPA_middle <- MedGPA %>%
+  filter(GPA >= 3.375, GPA <= 3.770)
+```
+
+```{r ex2-2, exercise = TRUE}
 # scatterplot with jitter
 data_space <- ggplot(___) + 
   geom_jitter(width = ___, height = ___, alpha = 0.5)
@@ -187,21 +215,21 @@ data_space +
   ___
 ```
 
-```{r ex2-hint-1}
-MedGPA_middle <- MedGPA %>%
-  filter(GPA >= ___, GPA <= ___)
+```{r ex2-2-hint-1}
+It's pretty similar to the first exercise.
 ```
 
-```{r ex2-hint-2}
+```{r ex2-2-hint-2}
+# scatterplot with jitter
+data_space <- ggplot(data = MedGPA_middle, aes(y = ___, x = ___)) + 
+  geom_jitter(width = 0, height = 0.05, alpha = 0.5)
+
+# linear regression line
 data_space + 
-  geom_smooth(method = "lm", se = FALSE)
+  geom_smooth(method = ___, se = ___)
 ```
 
-```{r ex2-solution}
-# filter
-MedGPA_middle <- MedGPA %>%
-  filter(GPA >= 3.375, GPA <= 3.770)
-
+```{r ex2-2-solution}
 # scatterplot with jitter
 data_space <- ggplot(data = MedGPA_middle, aes(y = Acceptance, x = GPA)) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5)
@@ -211,6 +239,9 @@ data_space +
   geom_smooth(method = "lm", se = FALSE)
 ```
 
+```{r ex2-2-check}
+grade_code("Your solution is correct!")
+```
 
 ### Fitting a model
 
@@ -229,18 +260,20 @@ where $\epsilon$ is the error term.
 
 Use `glm()` to fit a logistic regression model for `Acceptance` as a function of `GPA`.
 
+*Hint:* The only difference in syntax for `lm()` and `glm()` is that in `glm()` you also have to specify `family = binomial`.
+
 ```{r ex3, exercise=TRUE}
 # fit model
 glm(___, data = ___, family = ___)
 ```
 
-<div id="ex3-hint">
-**Hint:** The only difference in syntax for `lm()` and `glm()` is that in `glm()` you also have to specify `family = binomial`.
-</div>
-
 ```{r ex3-solution}
 # fit model
 glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
+```
+
+```{r ex3-check}
+grade_code("You have written the model correctly!")
 ```
 
 ## Visualizing logistic regression
@@ -339,31 +372,31 @@ However we also need to tell the `glm()` function which member of the GLM family
 
 
 ```{r ex4, exercise=TRUE}
-ggplot(___) + 
-  geom_jitter(___, alpha = .5) +
+data_space <- ggplot(___) + 
+  geom_jitter(___, alpha = 0.5) +
   ___
 ```
 
 ```{r ex4-hint-1}
-ggplot(___) + 
+data_space <- ggplot(___) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5)
   ___
 ```
 
 ```{r ex4-hint-2}
-ggplot(___) + 
+data_space <- ggplot(___) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5)
   geom_smooth(method = "glm", ___)
 ```
 
 ```{r ex4-hint-3}
-ggplot(___) + 
+data_space <- ggplot(___) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5)
   geom_smooth(method = "glm", se = ___, ___)
 ```
 
 ```{r ex4-hint-4}
-ggplot(___) + 
+data_space <- ggplot(___) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5)
   geom_smooth(method = "glm", se = ___, method.args = list(___))
 ```
@@ -372,6 +405,10 @@ ggplot(___) +
 data_space <- ggplot(data = MedGPA, aes(y = Acceptance, x = GPA)) + 
   geom_jitter(width = 0, height = 0.05, alpha = 0.5) +
   geom_smooth(method = "glm", se = FALSE, method.args = list(family = "binomial"))
+```
+
+```{r ex4-check}
+grade_code("Your solution is correct!")
 ```
 
 ### Using bins
@@ -396,10 +433,7 @@ Note that the left hand side is the expected probability $y$ of being accepted t
 - Augment the model `mod`. Create predictions on the scale of the response variable by using the `type.predict` argument.
 - Use `geom_line()` to illustrate the model through the fitted values.
 
-
-
-
-```{r}
+```{r ex5-1-setup}
 mod <- glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
 
 gpa_bins <- quantile(MedGPA$GPA, probs = 0:6/6)
@@ -408,50 +442,90 @@ MedGPA_binned <- MedGPA %>%
   group_by(bin) %>%
   summarize(mean_GPA = mean(GPA), 
             acceptance_rate = mean(Acceptance))
+
+data_space <- ggplot(data = MedGPA_binned, aes(x = mean_GPA, y = acceptance_rate)) + 
+  geom_point() + 
+  geom_line()
 ```
 
-
-```{r ex5, exercise=TRUE}
+```{r ex5-1, exercise=TRUE}
 # binned points and line
 data_space <- ___
+```
 
+```{r ex5-1-hint-1}
+data_space <- ggplot(___) + 
+  geom_point() + 
+  ___
+```
+
+```{r ex5-1-hint-2}
+data_space <- ggplot(data = ___, aes(x = ___, y = ___)) + 
+  geom_point() + 
+  geom_line()
+```
+
+```{r ex5-1-solution}
+data_space <- ggplot(data = MedGPA_binned, aes(x = mean_GPA, y = acceptance_rate)) + 
+  geom_point() + 
+  geom_line()
+```
+
+```{r ex5-1-check}
+grade_code("You solution is correct!")
+```
+
+```{r ex5-2, exercise=TRUE, exercise.setup = "ex5-1-setup"}
 # augmented model
 MedGPA_plus <- ___
+```
 
+```{r ex5-2-solution}
+MedGPA_plus <- mod %>%
+  augment(type.predict = "response")
+```
+
+```{r ex5-2-check}
+grade_code()
+```
+
+```{r ex5-3-setup}
+mod <- glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
+
+gpa_bins <- quantile(MedGPA$GPA, probs = 0:6/6)
+MedGPA_binned <- MedGPA %>%
+  mutate(bin = cut(GPA, breaks = gpa_bins, include.lowest = TRUE)) %>%
+  group_by(bin) %>%
+  summarize(mean_GPA = mean(GPA), 
+            acceptance_rate = mean(Acceptance))
+
+data_space <- ggplot(data = MedGPA_binned, aes(x = mean_GPA, y = acceptance_rate)) + 
+  geom_point() + 
+  geom_line()
+
+MedGPA_plus <- mod %>%
+  augment(type.predict = "response")
+```
+
+```{r ex5-3, exercise=TRUE}
 # logistic model on probability scale
 data_space +
-  geom_line(data = ___, aes(___), color = "red")
+  ____(data = ___, aes(___), color = "red")
 ```
 
-```{r ex5-hint-1}
-data_space <- ggplot(data = MedGPA_binned, aes(x = mean_GPA, y = acceptance_rate)) + 
-  geom_point() + 
-  geom_line()
-```
-
-```{r ex5-hint-2}
-MedGPA_plus <- mod %>%
-  augment(type.predict = "response")
-```
-
-```{r ex5-hint-3}
+```{r ex5-3-hint}
 data_space +
-  geom_line(data = ___, aes(x = GPA, y = .fitted), color = "red")
+  geom_line(data = ___, aes(x = GPA, y = ___), color = "red")
 ```
 
-```{r ex5-solution}
-# binned points and line
-data_space <- ggplot(data = MedGPA_binned, aes(x = mean_GPA, y = acceptance_rate)) + 
-  geom_point() + 
-  geom_line()
-
-# augmented model
-MedGPA_plus <- mod %>%
-  augment(type.predict = "response")
-
+```{r ex5-3-solution}
 # logistic model on probability scale
 data_space +
   geom_line(data = MedGPA_plus, aes(x = GPA, y = .fitted), color = "red")
+```
+
+```{r ex5-3-check}
+grade_code("Your plot is correct!")
 ```
 
 
@@ -661,6 +735,10 @@ data_space +
   geom_line(data = MedGPA_plus, aes(x = GPA, y = odds_hat), color = "red")
 ```
 
+```{r ex6-check}
+grade_code()
+```
+
 ### Log-odds scale
 
 Previously, we considered two formulations of logistic regression models:
@@ -747,6 +825,10 @@ MedGPA_plus <- MedGPA_plus %>%
 # logistic model on log odds scale
 data_space +
   geom_line(data = MedGPA_plus, aes(x = GPA, y = log_odds_hat), color = "red")
+```
+
+```{r ex7-check}
+grade_code()
 ```
 
 ### Interpretation of logistic regression
@@ -845,7 +927,7 @@ A logistic regression model object, `mod`, has been defined for you.
 - Create a new data frame which has one variable called `GPA` and one row, with the value 3.51.
 - Use `augment()` to find the expected probability of admission to medical school for a student with a GPA of 3.51.
 
-```{r}
+```{r ex8-setup}
 mod <- glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
 ```
 
@@ -857,8 +939,12 @@ new_data <- ___
 
 ```
 
-```{r ex8-hint}
+```{r ex8-hint-1}
 new_data <- data.frame(GPA = 3.51)
+```
+
+```{r ex8-hint-2}
+augment(___, newdata = ___, type.predict = "response")
 ```
 
 ```{r ex8-solution}
@@ -867,6 +953,10 @@ new_data <- data.frame(GPA = 3.51)
 
 # make predictions
 augment(mod, newdata = new_data, type.predict = "response")
+```
+
+```{r ex8-check}
+grade_code("You have predicted the value correctly.")
 ```
 
 ### Making binary predictions
@@ -884,7 +974,7 @@ The model object `mod` is already loaded for you.
 - Create a data frame with the actual observations, and their fitted probabilities, and add a new column, `Acceptance_hat`, with the *binary* decision by rounding the fitted probabilities.
 - Compute the confusion matrix between the actual and predicted acceptance.
 
-```{r}
+```{r ex9-setup}
 mod <- glm(Acceptance ~ GPA, data = MedGPA, family = binomial)
 ```
 
@@ -918,6 +1008,10 @@ tidy_mod <- augment(mod, type.predict = "response") %>%
 tidy_mod %>% 
   select(Acceptance, Acceptance_hat) %>%
   table()
+```
+
+```{r ex9-check}
+grade_code()
 ```
 
 ## Congratulations!
